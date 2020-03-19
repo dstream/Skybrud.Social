@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
 using System.Web;
@@ -166,7 +167,23 @@ namespace Skybrud.Social.Instagram.OAuth {
         /// </summary>
         /// <param name="state">A unique state for the request.</param>
         public string GetAuthorizationUrl(string state) {
-            return GetAuthorizationUrl(state, InstagramScope.Basic);
+            return GetAuthorizationUrl(state, InstagramScope.user_profile);
+        }
+
+        /// <summary>
+        /// Gets an authorization URL using the specified <var>state</var> and
+        /// request the specified <var>scope</var>.
+        /// </summary>
+        /// <param name="state">A unique state for the request.</param>
+        /// <param name="scopes">The list of scopes of your application.</param>
+        public string GetAuthorizationUrl(string state, IEnumerable<InstagramScope> scopes) {
+            return String.Format(
+                "https://api.instagram.com/oauth/authorize?client_id={0}&redirect_uri={1}&response_type=code&state={2}&scope={3}",
+                HttpUtility.UrlEncode(ClientId),
+                HttpUtility.UrlEncode(RedirectUri),
+                HttpUtility.UrlEncode(state),
+                HttpUtility.UrlEncode(string.Join(",", scopes).ToLower())
+            );
         }
 
         /// <summary>
@@ -175,16 +192,16 @@ namespace Skybrud.Social.Instagram.OAuth {
         /// </summary>
         /// <param name="state">A unique state for the request.</param>
         /// <param name="scope">The scope of your application.</param>
-        public string GetAuthorizationUrl(string state, InstagramScope scope) {
-            return String.Format(
-                "https://api.instagram.com/oauth/authorize/?client_id={0}&redirect_uri={1}&response_type=code&state={2}&scope={3}",
-                HttpUtility.UrlEncode(ClientId),
-                HttpUtility.UrlEncode(RedirectUri),
-                HttpUtility.UrlEncode(state),
-                HttpUtility.UrlEncode(scope.ToString().Replace(", ", "+").ToLower())
-            );
+        public string GetAuthorizationUrl(string state, InstagramScope scope)            
+        {
+            return GetAuthorizationUrl(state, new List<InstagramScope> { scope });
         }
 
+        /// <summary>
+        /// Get a Short-Lived Token from AuthCode
+        /// </summary>
+        /// <param name="authCode"></param>
+        /// <returns></returns>
         public InstagramAccessTokenResponse GetAccessTokenFromAuthCode(string authCode) {
         
             // Initialize collection with POST data
@@ -198,6 +215,53 @@ namespace Skybrud.Social.Instagram.OAuth {
 
             // Make the call to the API
             HttpWebResponse response = SocialUtils.DoHttpPostRequest("https://api.instagram.com/oauth/access_token", null, parameters);
+
+            // Wrap the native response class
+            SocialHttpResponse social = SocialHttpResponse.GetFromWebResponse(response);
+
+            // Parse the response
+            return InstagramAccessTokenResponse.ParseResponse(social);
+
+        }
+
+        /// <summary>
+        /// Get a Long-Lived Token from short-lived access token
+        /// </summary>
+        /// <param name="shortLivedAccessToken"></param>
+        /// <returns></returns>
+        public InstagramAccessTokenResponse GetLongLivedAccessToken(string shortLivedAccessToken)
+        {            
+            NameValueCollection parameters = new NameValueCollection {                
+                {"client_secret", ClientSecret},
+                {"grant_type", "ig_exchange_token"},                
+                {"access_token", shortLivedAccessToken }
+            };
+
+            // Make the call to the API
+            HttpWebResponse response = SocialUtils.DoHttpGetRequest("https://graph.instagram.com/access_token", parameters);
+
+            // Wrap the native response class
+            SocialHttpResponse social = SocialHttpResponse.GetFromWebResponse(response);
+
+            // Parse the response
+            return InstagramAccessTokenResponse.ParseResponse(social);
+
+        }
+
+        /// <summary>
+        /// Refreshing a long-lived token makes it valid for 60 days again
+        /// </summary>
+        /// <param name="longLivedAccessToken"></param>
+        /// <returns></returns>
+        public InstagramAccessTokenResponse RefreshLongLivedAccessToken(string longLivedAccessToken)
+        {            
+            NameValueCollection parameters = new NameValueCollection {                
+                {"grant_type", "ig_refresh_token"},
+                {"access_token", longLivedAccessToken }
+            };
+
+            // Make the call to the API
+            HttpWebResponse response = SocialUtils.DoHttpGetRequest("https://graph.instagram.com/refresh_access_token", parameters);
 
             // Wrap the native response class
             SocialHttpResponse social = SocialHttpResponse.GetFromWebResponse(response);

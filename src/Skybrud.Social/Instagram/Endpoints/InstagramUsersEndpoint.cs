@@ -41,25 +41,9 @@ namespace Skybrud.Social.Instagram.Endpoints {
         /// Gets information about the authenticated user.
         /// </summary>
         public InstagramUserResponse GetSelf() {
-            return InstagramUserResponse.ParseResponse(Raw.GetUser("self"));
+            return InstagramUserResponse.ParseResponse(Raw.GetUser("me"));
         }
-
-        /// <summary>
-        /// Gets the feed of the authenticated user.
-        /// </summary>
-        public InstagramUserFeedResponse GetUserFeed() {
-            return GetUserFeed(new InstagramUserFeedOptions());
-        }
-
-        /// <summary>
-        /// Gets the feed of the authenticated user.
-        /// </summary>
-        /// <param name="options">The options for the call to the API.</param>
-        public InstagramUserFeedResponse GetUserFeed(InstagramUserFeedOptions options) {
-            if (options == null) throw new ArgumentNullException("options");
-            return InstagramUserFeedResponse.ParseResponse(Raw.GetUserFeed(options));
-        }
-
+                
         /// <summary>
         /// Gets information about the user with the specified <code>userId</code>.
         /// </summary>
@@ -76,96 +60,26 @@ namespace Skybrud.Social.Instagram.Endpoints {
         public InstagramUserResponse GetInfo(long id) {
             return InstagramUserResponse.ParseResponse(Raw.GetUser(id.ToString(CultureInfo.InvariantCulture)));
         }
-
-        /// <summary>
-        /// Gets the the most recent media of the authenticated user.
-        /// </summary>
-        public InstagramRecentMediaResponse GetRecentMedia() {
-            return InstagramRecentMediaResponse.ParseResponse(Raw.GetRecentMedia("self"));
-        }
-
-        /// <summary>
-        /// Gets the the most recent media of the authenticated user.
-        /// </summary>
-        /// <param name="options">The search options with any optional parameters.</param>
-        public InstagramRecentMediaResponse GetRecentMedia(InstagramUserRecentMediaOptions options) {
-            return InstagramRecentMediaResponse.ParseResponse(Raw.GetRecentMedia("self", options));
-        }
-
-        /// <summary>
-        /// Gets the most recent media of the user with the specified <code>userId</code>.
-        /// </summary>
-        /// <param name="userId">The ID of the user.</param>
-        public InstagramRecentMediaResponse GetRecentMedia(long userId) {
-            return InstagramRecentMediaResponse.ParseResponse(Raw.GetRecentMedia(userId.ToString(CultureInfo.InvariantCulture)));
-        }
-
+        
         /// <summary>
         /// Gets the most recent media of the user with the specified <code>userId</code>.
         /// </summary>
         /// <param name="userId">The ID of the user.</param>
         /// <param name="count">The maximum amount of media to be returned.</param>
         public InstagramRecentMediaResponse GetRecentMedia(long userId, int count) {
-            return InstagramRecentMediaResponse.ParseResponse(Raw.GetRecentMedia(userId.ToString(CultureInfo.InvariantCulture), count));
-        }
+            var mediaResponse = InstagramMediasResponseBody.Parse(InstagramRecentMediaResponse.ParseResponse(Raw.GetRecentMedia(userId.ToString(CultureInfo.InvariantCulture))));
+            var result = new InstagramRecentMediaResponse();
+            result.AppendBody(mediaResponse.Data);
 
-        /// <summary>
-        /// Gets the most recent media of the user with the specified <code>userId</code>.
-        /// </summary>
-        /// <param name="userId">The ID of the user.</param>
-        /// <param name="options">The search options with any optional parameters.</param>
-        public InstagramRecentMediaResponse GetRecentMedia(long userId, InstagramUserRecentMediaOptions options) {
-            return InstagramRecentMediaResponse.ParseResponse(Raw.GetRecentMedia(userId.ToString(CultureInfo.InvariantCulture), options));
+            while (result.CountBody() < count && mediaResponse.Pagination != null && !string.IsNullOrEmpty(mediaResponse.Pagination.NextUrl))
+            {                 
+                mediaResponse = InstagramMediasResponseBody.Parse(InstagramRecentMediaResponse.ParseResponse(Raw.Client.DoAuthenticatedGetRequest(mediaResponse.Pagination.NextUrl)));
+                result.AppendBody(mediaResponse.Data);
+            }
+            result.EnsureBodyCount(count);
+            return result;
         }
-
-        /// <summary>
-        /// Gets a list of media liked by the authenticated user.
-        /// </summary>
-        public InstagramLikedMediaResponse GetLikedMedia() {
-            return InstagramLikedMediaResponse.ParseResponse(Raw.GetLikedMedia());
-        }
-
-        /// <summary>
-        /// Gets a list of media liked by the authenticated user.
-        /// </summary>
-        /// <param name="count">The maximum amount of media to be returned.</param>
-        public InstagramLikedMediaResponse GetLikedMedia(int count) {
-            return InstagramLikedMediaResponse.ParseResponse(Raw.GetLikedMedia(count));
-        }
-
-        /// <summary>
-        /// Gets a list of media liked by the authenticated user.
-        /// </summary>
-        /// <param name="options">The search options with any optional parameters.</param>
-        public InstagramLikedMediaResponse GetLikedMedia(InstagramUserLikedMediaOptions options) {
-            return InstagramLikedMediaResponse.ParseResponse(Raw.GetLikedMedia(options));
-        }
-
-        /// <summary>
-        /// Search for a user by name.
-        /// </summary>
-        /// <param name="query">A query string.</param>
-        public InstagramUsersResponse Search(string query) {
-            return InstagramUsersResponse.ParseResponse(Raw.Search(query));
-        }
-
-        /// <summary>
-        /// Search for a user by name.
-        /// </summary>
-        /// <param name="query">A query string.</param>
-        /// <param name="count">The maximum amount of users to be returned.</param>
-        public InstagramUsersResponse Search(string query, int count) {
-            return InstagramUsersResponse.ParseResponse(Raw.Search(query, count));
-        }
-
-        /// <summary>
-        /// Search for a user by name.
-        /// </summary>
-        /// <param name="options">The options for the call to the API.</param>
-        public InstagramUsersResponse Search(InstagramUserSearchOptions options) {
-            return InstagramUsersResponse.ParseResponse(Raw.Search(options));
-        }
-
+       
         #endregion
 
     }

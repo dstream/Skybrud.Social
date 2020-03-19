@@ -36,37 +36,7 @@ namespace Skybrud.Social.Instagram.Endpoints {
         /// <param name="mediaId">The ID of the media.</param>
         public InstagramMediaResponse GetMedia(string mediaId) {
             return InstagramMediaResponse.ParseResponse(Raw.GetMedia(mediaId));
-        }
-        
-        /// <summary>
-        /// Search for media in a given area. The default time span is set to 5 days. Can return mix of image
-        /// and video types.
-        /// </summary>
-        /// <param name="latitude">The latitude of the point.</param>
-        /// <param name="longitude">The longitude of the point.</param>
-        public InstagramRecentMediaResponse Search(double latitude, double longitude) {
-            return InstagramRecentMediaResponse.ParseResponse(Raw.Search(latitude, longitude));
-        }
-
-        /// <summary>
-        /// Search for media in a given area. The default time span is set to 5 days. Can return mix of image
-        /// and video types.
-        /// </summary>
-        /// <param name="latitude">The latitude of the point.</param>
-        /// <param name="longitude">The longitude of the point.</param>
-        /// <param name="distance">The distance/radius in meters. The API allows a maximum radius of 5000 meters.</param>
-        public InstagramRecentMediaResponse Search(double latitude, double longitude, int distance) {
-            return InstagramRecentMediaResponse.ParseResponse(Raw.Search(latitude, longitude, distance));
-        }
-
-        /// <summary>
-        /// Search for media in a given area. The default time span is set to 5 days. The time span must not
-        /// exceed 7 days. Defaults time stamps cover the last 5 days. Can return mix of image and video types.
-        /// </summary>
-        /// <param name="options">The search options.</param>
-        public InstagramRecentMediaResponse Search(InstagramRecentMediaSearchOptions options) {
-            return InstagramRecentMediaResponse.ParseResponse(Raw.Search(options));
-        }
+        }                
 
         #endregion
 

@@ -24,66 +24,42 @@ namespace Skybrud.Social.Instagram.Objects {
         public string Id { get; internal set; }
 
         /// <summary>
-        /// The type of the media.
+        /// The Media's type. Can be IMAGE, VIDEO, or CAROUSEL_ALBUM.
         /// </summary>
         public string Type { get; internal set; }
 
         /// <summary>
-        /// Array of tags used with this media.
+        /// The Media's caption text. Not returnable for Media in albums.
         /// </summary>
-        public string[] Tags { get; internal set; }
+        public string Caption { get; set; }        
 
         /// <summary>
-        /// The filter used for this media.
+        /// The Media's URL.
         /// </summary>
-        public string Filter { get; internal set; }
+        public string MediaUrl { get; set; }
 
         /// <summary>
-        /// Specifies the time of creation in UTC/GMT 0.
+        /// The Media's permanent URL.
         /// </summary>
-        public DateTime Created { get; internal set; }
-
-        public string Link { get; internal set; }
-        public int LikeCount { get; internal set; }
-        public int CommentCount { get; internal set; }
-        public InstagramComment[] Comments { get; internal set; }
-
-        public InstagramImageSummary Images { get; private set; }
-        
-        public string Thumbnail {
-            get { return Images.Thumbnail.Url; }
-        }
-
-        public string LowRes {
-            get { return Images.LowResolution.Url; }
-        }
-
-        public string Standard {
-            get { return Images.StandardResolution.Url; }
-        }
-
-        public InstagramComment Caption { get; set; }
-        public string CaptionText {
-            get { return Caption == null ? null : Caption.Text; }
-        }
-
-        public InstagramUser User { get; private set; }
-        public InstagramLocation Location { get; private set; }
+        public string Permalink { get; internal set; }
+               
+        /// <summary>
+        /// The Media's thumbnail image URL. Only available on VIDEO Media.
+        /// </summary>
+        public string Thumbnail { get; set; }
 
         /// <summary>
-        /// Gets an array of users tagged in the photo.
+        /// The Media owner's username.
         /// </summary>
-        public InstagramTaggedUser[] UsersInPhoto { get; private set; }
+        public string Username { get; set; }
 
-        public DateTime Date {
-            get { return Created; }
-        }
+        /// <summary>
+        /// The Media's publish date, in UTC/GMT 0.
+        /// </summary>
+        public DateTime Timestamp { get; internal set; }
 
-        public InstagramUserSummary[] Likes { get; internal set; }
 
-        public DateTime SortDate {
-            get { return Date; }
-        }
+        public DateTime SortDate => Timestamp;
 
         #endregion
 
@@ -120,40 +96,19 @@ namespace Skybrud.Social.Instagram.Objects {
         public static InstagramMedia Parse(JsonObject obj) {
 
             if (obj == null) return null;
+           
+            string type = obj.GetString("media_type");
 
-            JsonObject comments = obj.GetObject("comments");
-            JsonObject likes = obj.GetObject("likes");
-
-            string type = obj.GetString("type");
-
-            InstagramMedia media = null;
-
-            if (type == "image") {
-                media = new InstagramImage(obj);
-            } else if (type == "video") {
-                media = new InstagramVideo(obj) {
-                    Videos = obj.GetObject("videos", InstagramVideoSummary.Parse)
-                };
-            } else {
-                /* eg. "carousel" */
-                media = new InstagramMedia(obj);
-            }
-
-            media.Id = obj.GetString("id");
-            media.Type = type;
-            media.Tags = obj.GetArray("tags").Cast<string>();
-            media.Created = SocialUtils.GetDateTimeFromUnixTime(obj.GetInt64("created_time"));
-            media.Link = obj.GetString("link");
-            media.Filter = obj.GetString("filter");
-            media.CommentCount = comments.GetInt32("count");
-            media.Comments = comments.GetArray("data", InstagramComment.Parse);
-            media.LikeCount = likes.GetInt32("count");
-            media.Likes = likes.GetArray("data", InstagramUserSummary.Parse);
-            media.Images = obj.GetObject("images", InstagramImageSummary.Parse);
-            media.Caption = obj.GetObject("caption", InstagramComment.Parse);
-            media.User = obj.GetObject("user", InstagramUser.Parse);
-            media.Location = obj.GetObject("location", InstagramLocation.Parse);
-            media.UsersInPhoto = obj.GetArray("users_in_photo", InstagramTaggedUser.Parse);
+            var media = new InstagramMedia(obj)
+            {
+                Id = obj.GetString("id"),
+                Type = obj.GetString("media_type"),
+                MediaUrl = obj.GetString("media_url"),
+                Permalink = obj.GetString("permalink"),
+                Thumbnail = obj.GetString("thumbnail_url"),
+                Username = obj.GetString("username"),
+                Timestamp = DateTime.Parse("2010-08-20T15:00:00Z", null, System.Globalization.DateTimeStyles.RoundtripKind)
+            };
 
             return media;
 

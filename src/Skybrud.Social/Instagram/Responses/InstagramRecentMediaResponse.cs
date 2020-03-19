@@ -3,20 +3,26 @@ using Skybrud.Social.Http;
 using Skybrud.Social.Json;
 using Skybrud.Social.Instagram.Objects;
 using Skybrud.Social.Instagram.Objects.Pagination;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Skybrud.Social.Instagram.Responses {
 
-    public class InstagramRecentMediaResponse : InstagramResponse<InstagramMediasResponseBody> {
+    public class InstagramRecentMediaResponse : InstagramResponse<List<InstagramMedia>> {
 
-        #region Constructors
+        #region Constructors        
+
+        public InstagramRecentMediaResponse() {
+            Body = new List<InstagramMedia>();
+        }
 
         private InstagramRecentMediaResponse(SocialHttpResponse response) : base(response) { }
 
         #endregion
 
         #region Static methods
-
-        public static InstagramRecentMediaResponse ParseResponse(SocialHttpResponse response) {
+        
+        public static JsonObject ParseResponse(SocialHttpResponse response) {
 
             // Some input validation
             if (response == null) throw new ArgumentNullException("response");
@@ -28,11 +34,37 @@ namespace Skybrud.Social.Instagram.Responses {
             // Validate the response
             ValidateResponse(response, obj);
 
-            // Initialize the response object
-            return new InstagramRecentMediaResponse(response) {
-                Body = InstagramMediasResponseBody.Parse(obj)
-            };
+            return obj;
 
+        }
+
+        public void AppendBody(IEnumerable<InstagramMedia> body)
+        {
+            if (body == null) return;
+            EnsureBodyNotNull();            
+            Body.AddRange(body);
+        }
+
+        public int CountBody()
+        {
+            EnsureBodyNotNull();
+            return Body.Count;
+        }
+
+        /// <summary>
+        /// Ensure only get [count] of data
+        /// </summary>
+        /// <param name="count"></param>
+        public void EnsureBodyCount(int count) {
+            Body = Body.Take(count).ToList();
+        }
+
+        private void EnsureBodyNotNull()
+        {
+            if (Body == null)
+            {
+                Body = new List<InstagramMedia>();
+            }
         }
 
         #endregion
@@ -53,7 +85,7 @@ namespace Skybrud.Social.Instagram.Responses {
 
         #endregion
 
-        #region Static methods
+        #region Static methods        
 
         public static InstagramMediasResponseBody Parse(JsonObject obj) {
             return new InstagramMediasResponseBody(obj) {

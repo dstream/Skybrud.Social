@@ -20,24 +20,39 @@ namespace Skybrud.Social.Instagram.Objects {
         /// <summary>
         /// The full name of the user. A user may not have specified a full name.
         /// </summary>
+        [Obsolete("Not supported in Instagram Basic Display API")]
         public string FullName { get; private set; }
 
         /// <summary>
         /// The profile picture of the user.
         /// </summary>
+        [Obsolete("Not supported in Instagram Basic Display API")]
         public string ProfilePicture { get; private set; }
 
         /// <summary>
         /// The website of the user. A user may not have specified a website.
         /// </summary>
+        [Obsolete("Not supported in Instagram Basic Display API")]
         public string Website { get; private set; }
 
         /// <summary>
         /// The bio of the user. A user may not have specified a bio.
         /// </summary>
+        [Obsolete("Not supported in Instagram Basic Display API")]
         public string Bio { get; private set; }
 
+        [Obsolete("Not supported in Instagram Basic Display API")]
         public InstagramUserCounts Counts { get; private set; }
+        
+        /// <summary>
+        /// The User's account type. Can be BUSINESS, MEDIA_CREATOR, or PERSONAL.
+        /// </summary>
+        public string AccountType { get; private set; }
+
+        /// <summary>
+        /// The number of Media on the User. This field requires the instagram_graph_user_media permission.
+        /// </summary>
+        public int MediaCount { get; private set; }
 
         #endregion
 
@@ -70,19 +85,12 @@ namespace Skybrud.Social.Instagram.Objects {
         /// </summary>
         /// <param name="obj">The instance of <var>JsonObject</var> to parse.</param>
         public static InstagramUser Parse(JsonObject obj) {
-            if (obj == null) return null;
-            string fullname = obj.GetString("full_name");
-            string picture = obj.GetString("profile_picture");
-            string website = obj.GetString("website");
-            string bio = obj.GetString("bio");
+            if (obj == null) return null;            
             return new InstagramUser(obj) {
-                Id = obj.GetInt64("id"),
-                Username = obj.GetString("username"),
-                FullName = String.IsNullOrEmpty(fullname) ? null : fullname,
-                ProfilePicture = String.IsNullOrEmpty(picture) ? null : picture,
-                Website = String.IsNullOrEmpty(website) ? null : website,
-                Bio = String.IsNullOrEmpty(bio) ? null : bio,
-                Counts = obj.GetObject("counts", InstagramUserCounts.Parse)
+                Id = obj.GetInt64(InstagramUserField.id.ToString()),
+                Username = obj.GetString(InstagramUserField.username.ToString()),
+                AccountType = obj.GetString(InstagramUserField.account_type.ToString()),
+                MediaCount = obj.GetInt32(InstagramUserField.media_count.ToString())   
             };
         }
 

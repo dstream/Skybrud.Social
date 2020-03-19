@@ -54,6 +54,8 @@ namespace Skybrud.Social.Http {
 
         #region Constructors
 
+        protected SocialResponse() { }
+
         protected SocialResponse(SocialHttpResponse response) {
             Response = response;
         }

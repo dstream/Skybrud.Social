@@ -23,6 +23,8 @@ namespace Skybrud.Social.Instagram.Responses {
 
         #region Constructors
 
+        protected InstagramResponse() { }
+
         protected InstagramResponse(SocialHttpResponse response) : base(response) {
             RateLimiting = InstagramRateLimiting.GetFromResponse(response);
         }
@@ -43,14 +45,15 @@ namespace Skybrud.Social.Instagram.Responses {
 
             // Get the "meta" object
             InstagramMetaData meta = obj.GetObject("meta", InstagramMetaData.Parse);
+            if (meta != null)
+            {
+                // Now throw some exceptions
+                if (meta.ErrorType == "OAuthException") throw new InstagramOAuthException(response, meta);
+                if (meta.ErrorType == "OAuthAccessTokenException") throw new InstagramOAuthAccessTokenException(response, meta);
+                if (meta.ErrorType == "APINotFoundError") throw new InstagramNotFoundException(response, meta);
 
-            // Now throw some exceptions
-            if (meta.ErrorType == "OAuthException") throw new InstagramOAuthException(response, meta);
-            if (meta.ErrorType == "OAuthAccessTokenException") throw new InstagramOAuthAccessTokenException(response, meta);
-            if (meta.ErrorType == "APINotFoundError") throw new InstagramNotFoundException(response, meta);
-
-            throw new InstagramException(response, meta);
-
+                throw new InstagramException(response, meta);
+            }            
         }
 
         #endregion
@@ -72,6 +75,8 @@ namespace Skybrud.Social.Instagram.Responses {
         #endregion
 
         #region Constructors
+
+        protected InstagramResponse() { }
 
         protected InstagramResponse(SocialHttpResponse response) : base(response) { }
 

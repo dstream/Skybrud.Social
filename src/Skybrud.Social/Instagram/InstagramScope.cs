@@ -6,30 +6,18 @@ namespace Skybrud.Social.Instagram {
     public enum InstagramScope {
 
         /// <summary>
-        /// To read any and all data related to a user (e.g. following/followed-by lists, photos, etc.) (granted by default).
+        /// Grants your app permission to read the app user's profile. (e.g. following/followed-by lists, photos, etc.) (granted by default).
         /// </summary>
-        Basic = 0,
+        user_profile = 0,
 
         /// <summary>
-        /// To create or delete comments on a user’s behalf.
+        /// Grants your app permission to read the app user's IG Media objects.
+        /// Allowed Usage:
+        /// - Creating physical or digital books from the app user's photos, including exporting photos for printing
+        /// - Displaying the app users photos to other app users within the app (e.g, for Dating or Social Network Applications)
+        /// - Editing or creating new photos or videos based on the app user's existing photos and videos (Photo/Video Editing Apps)
+        /// - Displaying the app user's photos and videos in an external device such as a TV or digital photo frame
         /// </summary>
-        Comments = 1,
-
-        /// <summary>
-        /// To follow and unfollow users on a user’s behalf.
-        /// </summary>
-        Relationships = 2,
-
-        /// <summary>
-        /// To like and unlike items on a user’s behalf.
-        /// </summary>
-        Likes = 4,
-
-        /// <summary>
-        /// To read any public profile info and media on a user’s behalf.
-        /// </summary>
-        PublicContent = 4
-    
-    }
-
+        user_media = 1,            
+    }    
 }

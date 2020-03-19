@@ -9,11 +9,21 @@ namespace Skybrud.Social.Instagram.Objects {
         /// Gets the access token.
         /// </summary>
         public string AccessToken { get; private set; }
-        
+
         /// <summary>
-        /// Gets information about the authenticated user.
+        /// Gets user_id
         /// </summary>
-        public InstagramUser User { get; private set; }
+        public long UserId { get; private set; }
+
+        /// <summary>
+        /// bearer if it's long-lived token, empty otherwise
+        /// </summary>
+        public string TokenType { get; set; }
+
+        /// <summary>
+        /// Long-lived tokend expired timestamp, in seconds, it's 60 days normally
+        /// </summary>
+        public long ExpiresIn { get; set; }
 
         #endregion
 
@@ -33,7 +43,9 @@ namespace Skybrud.Social.Instagram.Objects {
             if (obj == null) return null;
             return new InstagramAccessTokenSummary(obj) {
                 AccessToken = obj.GetString("access_token"),
-                User = obj.GetObject("user", InstagramUser.Parse)
+                UserId = obj.GetInt64("user_id"),
+                TokenType = obj.GetString("token_type"),
+                ExpiresIn = obj.GetInt64("expires_in")
             };
         }
 

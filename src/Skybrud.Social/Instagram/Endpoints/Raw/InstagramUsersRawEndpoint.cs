@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Skybrud.Social.Http;
 using Skybrud.Social.Instagram.OAuth;
 using Skybrud.Social.Instagram.Options.Users;
@@ -28,122 +30,37 @@ namespace Skybrud.Social.Instagram.Endpoints.Raw {
         #endregion
 
         #region Methods
-        
+
         /// <summary>
         /// Gets information about the user with the specified <code>identifier</code>.
         /// </summary>
-        /// <param name="identifier">The identifier of the user.</param>
-        public SocialHttpResponse GetUser(string identifier) {
-            return Client.DoAuthenticatedGetRequest("https://api.instagram.com/v1/users/" + identifier + "/");
-        }
+        /// <param name="identifier">The identifier of the user: UserId or Me.</param>
+        /// <param name="fields">A comma-separated list of fields and edges you want returned. If omitted, default fields will be returned.</param>
+        public SocialHttpResponse GetUser(string identifier, IEnumerable<InstagramUserField> fields = null) {
+            var url = "https://graph.instagram.com/" + identifier;
+            if (fields == null)
+            {
+                url += "?fields=" + string.Join(",", Enum.GetValues(typeof(InstagramUserField)).Cast<InstagramUserField>().Select(v => v.ToString()));
+            }
 
-        /// <summary>
-        /// Gets the feed of the authenticated user.
-        /// </summary>
-        /// <returns>Returns an instance of <code>SocialHttpResponse</code> representing the response.</returns>
-        public SocialHttpResponse GetUserFeed() {
-            return GetUserFeed(new InstagramUserFeedOptions());
-        }
-
-        /// <summary>
-        /// Gets the feed of the authenticated user.
-        /// </summary>
-        /// <param name="options">The options for the call to the API.</param>
-        /// <returns>Returns an instance of <code>SocialHttpResponse</code> representing the response.</returns>
-        public SocialHttpResponse GetUserFeed(InstagramUserFeedOptions options) {
-            return Client.DoAuthenticatedGetRequest("https://api.instagram.com/v1/users/self/feed", options);
-        }
-
-        /// <summary>
-        /// Gets the most recent media published by the user with the specified <code>identifier</code>.
-        /// </summary>
-        /// <param name="identifier">The identifier of the user.</param>
-        /// <returns>Returns the raw JSON response from the API.</returns>
-        public SocialHttpResponse GetRecentMedia(string identifier) {
-            return GetRecentMedia(identifier, new InstagramUserRecentMediaOptions());
-        }
-
-        /// <summary>
-        /// Gets the most recent media published by the user with the specified <code>identifier</code>.
-        /// </summary>
-        /// <param name="identifier">The identifier of the user.</param>
-        /// <param name="count">The maximum amount of media to be returned.</param>
-        /// <returns>Returns the raw JSON response from the API.</returns>
-        public SocialHttpResponse GetRecentMedia(string identifier, int count) {
-            return GetRecentMedia(identifier, new InstagramUserRecentMediaOptions {
-                Count = count
-            });
-        }
-
-        /// <summary>
-        /// Gets the most recent media published by the user with the specified <code>identifier</code>.
-        /// </summary>
-        /// <param name="identifier">The identifier of the user.</param>
-        /// <param name="options">The search options with any optional parameters.</param>
-        /// <returns>Returns the raw JSON response from the API.</returns>
-        public SocialHttpResponse GetRecentMedia(string identifier, InstagramUserRecentMediaOptions options) {
-            if (options == null) throw new ArgumentNullException("options");
-            return Client.DoAuthenticatedGetRequest("https://api.instagram.com/v1/users/" + identifier + "/media/recent/", options);
-        }
-
-        /// <summary>
-        /// Gets a list of media liked by the authenticated user.
-        /// </summary>
-        /// <returns>Returns the raw JSON response from the API.</returns>
-        public SocialHttpResponse GetLikedMedia() {
-            return Client.DoAuthenticatedGetRequest("https://api.instagram.com/v1/users/self/media/liked");
-        }
-
-        /// <summary>
-        /// Gets a list of media liked by the authenticated user.
-        /// </summary>
-        /// <param name="count">The maximum amount of media to be returned.</param>
-        /// <returns>Returns the raw JSON response from the API.</returns>
-        public SocialHttpResponse GetLikedMedia(int count) {
-            return GetLikedMedia(new InstagramUserLikedMediaOptions {
-                Count = count
-            });
-        }
-
-        /// <summary>
-        /// Gets a list of media liked by the authenticated user.
-        /// </summary>
-        /// <param name="options">The search options with any optional parameters.</param>
-        /// <returns>Returns the raw JSON response from the API.</returns>
-        public SocialHttpResponse GetLikedMedia(InstagramUserLikedMediaOptions options) {
-            return Client.DoAuthenticatedGetRequest("https://api.instagram.com/v1/users/self/media/liked", options);
-        }
-
-        /// <summary>
-        /// Search for a user by name.
-        /// </summary>
-        /// <param name="query">A query string.</param>
-        public SocialHttpResponse Search(string query) {
-            return Search(new InstagramUserSearchOptions {
-                Query = query
-            });
-        }
+            return Client.DoAuthenticatedGetRequest(url);
+        }                
         
         /// <summary>
-        /// Search for a user by name.
+        /// Get user's medias (image, video, or album)
+        /// You will need the instagram_graph_user_profile permission, so request the user_profile scope when you get authorization from the user.
         /// </summary>
-        /// <param name="query">A query string.</param>
-        /// <param name="count">The maximum amount of users to be returned.</param>
-        public SocialHttpResponse Search(string query, int count) {
-            return Search(new InstagramUserSearchOptions {
-                Query = query,
-                Count = count
-            });
+        /// <param name="identifier">UserId or Me</param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public SocialHttpResponse GetRecentMedia(string identifier)
+        {
+            var fields = string.Join(",", Enum.GetValues(typeof(InstagramMediaField)).Cast<InstagramMediaField>().Select(v => v.ToString()));
+            var url = "https://graph.instagram.com/" + identifier + "/media?fields=" + fields;            
+
+            return Client.DoAuthenticatedGetRequest(url);
         }
         
-        /// <summary>
-        /// Search for a user by name.
-        /// </summary>
-        /// <param name="options">The options for the call to the API.</param>
-        public SocialHttpResponse Search(InstagramUserSearchOptions options) {
-            return Client.DoAuthenticatedGetRequest("https://api.instagram.com/v1/users/search", options);
-        }
-
         #endregion
 
     }

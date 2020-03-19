@@ -50,7 +50,7 @@ namespace Skybrud.Social.Instagram.Responses {
 
         public static InstagramUserResponseBody Parse(JsonObject obj) {
             return new InstagramUserResponseBody(obj) {
-                Data = obj.GetObject("data", InstagramUser.Parse)
+                Data = InstagramUser.Parse(obj)
             };
         }
 
