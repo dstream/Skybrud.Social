@@ -89,7 +89,7 @@ namespace Skybrud.Social.Instagram.Responses {
 
         public static InstagramMediasResponseBody Parse(JsonObject obj) {
             return new InstagramMediasResponseBody(obj) {
-                Pagination = obj.GetObject("pagination", InstagramIdBasedPagination.Parse),
+                Pagination = obj.GetObject("paging", InstagramIdBasedPagination.Parse),
                 Data = obj.GetArray("data", InstagramMedia.Parse)
             };
         }
