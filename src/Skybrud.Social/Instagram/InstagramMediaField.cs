@@ -38,4 +38,19 @@ namespace Skybrud.Social.Instagram {
         username
     }
 
+    /// <summary>
+    /// Only available when using Facebook Graph API
+    /// </summary>
+    public enum InstagramMediaExtraField
+    {
+        /// <summary>
+        /// excludes album children and the caption, includes replies
+        /// </summary>
+        comments_count,
+        /// <summary>
+        /// excludes album children and likes on promoted posts created from the media object, includes replies
+        /// </summary>
+        like_count,
+    }
+
 }

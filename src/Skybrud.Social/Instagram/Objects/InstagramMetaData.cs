@@ -22,12 +22,33 @@ namespace Skybrud.Social.Instagram.Objects {
 
         #region Static methods
 
-        public static InstagramMetaData Parse(JsonObject obj) {
+        /// <summary>
+        /// Parse error from instagram basic api
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static InstagramMetaData ParseMeta(JsonObject obj) {
             if (obj == null) return null;
             return new InstagramMetaData(obj) {
                 Code = obj.GetInt32("code"),
                 ErrorType = obj.GetString("error_type"),
                 ErrorMessage = obj.GetString("error_message")
+            };
+        }
+
+        /// <summary>
+        /// Parse error from facebook graph api
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static InstagramMetaData ParseError(JsonObject obj)
+        {
+            if (obj == null) return null;
+            return new InstagramMetaData(obj)
+            {
+                Code = obj.GetInt32("code"),
+                ErrorType = obj.GetString("type"),
+                ErrorMessage = obj.GetString("message")
             };
         }
 

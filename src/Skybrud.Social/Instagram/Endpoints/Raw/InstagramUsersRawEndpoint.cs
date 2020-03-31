@@ -56,7 +56,12 @@ namespace Skybrud.Social.Instagram.Endpoints.Raw {
         public SocialHttpResponse GetRecentMedia(string identifier)
         {
             var fields = string.Join(",", Enum.GetValues(typeof(InstagramMediaField)).Cast<InstagramMediaField>().Select(v => v.ToString()));
-            var url = "https://graph.instagram.com/" + identifier + "/media?fields=" + fields;            
+            var url = $"https://graph.instagram.com/{identifier}/media?fields={fields}";
+            if (Client.UseInstagramGraphAPI)
+            {
+                var extrafields = string.Join(",", Enum.GetValues(typeof(InstagramMediaExtraField)).Cast<InstagramMediaExtraField>().Select(v => v.ToString())); 
+                url = $"https://graph.facebook.com{Client.GetVersionUrl()}{identifier}/media?fields={fields + "," + extrafields}";
+            }
 
             return Client.DoAuthenticatedGetRequest(url);
         }

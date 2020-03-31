@@ -44,7 +44,11 @@ namespace Skybrud.Social.Instagram.Responses {
             if (response.StatusCode == HttpStatusCode.OK) return;
 
             // Get the "meta" object
-            InstagramMetaData meta = obj.GetObject("meta", InstagramMetaData.Parse);
+            InstagramMetaData meta = obj.GetObject("meta", InstagramMetaData.ParseMeta);
+            if(meta == null)
+            {
+                meta = obj.GetObject("error", InstagramMetaData.ParseError);
+            }
             if (meta != null)
             {
                 // Now throw some exceptions
@@ -107,7 +111,7 @@ namespace Skybrud.Social.Instagram.Responses {
         #region Constructors
 
         protected InstagramResponseBody(JsonObject obj) : base(obj) {
-            Meta = obj.GetObject("meta", InstagramMetaData.Parse);
+            Meta = obj.GetObject("meta", InstagramMetaData.ParseMeta);
         }
 
         #endregion

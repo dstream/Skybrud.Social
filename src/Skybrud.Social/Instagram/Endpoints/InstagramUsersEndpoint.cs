@@ -66,8 +66,8 @@ namespace Skybrud.Social.Instagram.Endpoints {
         /// </summary>
         /// <param name="userId">The ID of the user.</param>
         /// <param name="count">The maximum amount of media to be returned.</param>
-        public InstagramRecentMediaResponse GetRecentMedia(long userId, int count) {
-            var mediaResponse = InstagramMediasResponseBody.Parse(InstagramRecentMediaResponse.ParseResponse(Raw.GetRecentMedia(userId.ToString(CultureInfo.InvariantCulture))));
+        public InstagramRecentMediaResponse GetRecentMedia(string userId, int count) {
+            var mediaResponse = InstagramMediasResponseBody.Parse(InstagramRecentMediaResponse.ParseResponse(Raw.GetRecentMedia(userId)));
             var result = new InstagramRecentMediaResponse();
             result.AppendBody(mediaResponse.Data);
 

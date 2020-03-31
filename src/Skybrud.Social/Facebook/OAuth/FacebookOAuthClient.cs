@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using System.Web;
 using Skybrud.Social.Facebook.Endpoints.Raw;
+using Skybrud.Social.Facebook.Responses;
 using Skybrud.Social.Http;
 using Skybrud.Social.Interfaces;
 using Skybrud.Social.Json;
@@ -235,7 +236,7 @@ namespace Skybrud.Social.Facebook.OAuth {
         }
 
         /// <summary>
-        /// Exchanges the specified authorization code for a user access token.
+        /// Exchanges the specified authorization code for a user short-lived access token.
         /// </summary>
         /// <param name="authCode">The authorization code received from the Facebook OAuth dialog.</param>
         /// <returns>Returns an access token based on the specified <code>authCode</code>.</returns>
@@ -264,11 +265,15 @@ namespace Skybrud.Social.Facebook.OAuth {
         }
 
         /// <summary>
-        /// Attempts to renew the specified user access token. The current access token must be valid.
+        /// Exchange to long-lived access token from short-lived access token.
+        /// A long-lived token generally lasts about 60 days.
+        /// These tokens are refreshed once per day, when the person using your app makes a request to Facebook's servers. If no requests are made, 
+        /// the token will expire after about 60 days and the person will have to go through the login flow again to get a new token.
         /// </summary>
         /// <param name="currentToken">The current access token.</param>
         /// <returns>Returns the new access token.</returns>
-        public string RenewAccessToken(string currentToken) {
+        public string RenewAccessToken(string currentToken)
+        {
 
             // Initialize the query string
             NameValueCollection query = new NameValueCollection {
@@ -284,7 +289,8 @@ namespace Skybrud.Social.Facebook.OAuth {
             // TODO: Add some validation
 
             // Parse the contents
-            if (contents.StartsWith("{")) {
+            if (contents.StartsWith("{"))
+            {
                 JsonObject obj = JsonObject.ParseJson(contents);
                 return obj.GetString("access_token");
             }

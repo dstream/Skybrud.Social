@@ -61,6 +61,14 @@ namespace Skybrud.Social.Instagram.Objects {
 
         public DateTime SortDate => Timestamp;
 
+        #region Extra properties: only available when using Facebook Graph API
+
+        public int CommentsCount { get; set; }
+
+        public int LikesCount { get; set; }
+
+        #endregion
+
         #endregion
 
         #region Constructors
@@ -107,7 +115,9 @@ namespace Skybrud.Social.Instagram.Objects {
                 Permalink = obj.GetString("permalink"),
                 Thumbnail = obj.GetString("thumbnail_url"),
                 Username = obj.GetString("username"),
-                Timestamp = DateTime.Parse("2010-08-20T15:00:00Z", null, System.Globalization.DateTimeStyles.RoundtripKind)
+                Timestamp = DateTime.Parse("2010-08-20T15:00:00Z", null, System.Globalization.DateTimeStyles.RoundtripKind),
+                LikesCount = obj.GetInt32("like_count"),
+                CommentsCount = obj.GetInt32("comments_count")
             };
 
             return media;

@@ -59,6 +59,16 @@ namespace Skybrud.Social.Instagram.OAuth {
         public string AccessToken { get; set; }
 
         /// <summary>
+        /// Professonal Account Will use Instagram Graph API instead of Instagram Basic API
+        /// </summary>
+        public bool UseInstagramGraphAPI { get; set; }
+
+        /// <summary>
+        /// Default is v6.0
+        /// </summary>
+        public string FacebookApiVersion { get; set; }
+
+        /// <summary>
         /// Gets a reference to the locations endpoint.
         /// </summary>
         public InstagramLocationsRawEndpoint Locations {
@@ -110,7 +120,7 @@ namespace Skybrud.Social.Instagram.OAuth {
         /// </summary>
         /// <param name="accessToken">A valid access token.</param>
         public InstagramOAuthClient(string accessToken) {
-            AccessToken = accessToken;
+            AccessToken = accessToken;            
         }
 
         /// <summary>
@@ -160,42 +170,22 @@ namespace Skybrud.Social.Instagram.OAuth {
         #endregion
 
         #region Methods
-
-        /// <summary>
-        /// Gets an authorization URL using the specified <var>state</var>.
-        /// This URL will only make your application request a basic scope.
-        /// </summary>
-        /// <param name="state">A unique state for the request.</param>
-        public string GetAuthorizationUrl(string state) {
-            return GetAuthorizationUrl(state, InstagramScope.user_profile);
-        }
-
+      
         /// <summary>
         /// Gets an authorization URL using the specified <var>state</var> and
         /// request the specified <var>scope</var>.
         /// </summary>
         /// <param name="state">A unique state for the request.</param>
-        /// <param name="scopes">The list of scopes of your application.</param>
-        public string GetAuthorizationUrl(string state, IEnumerable<InstagramScope> scopes) {
+        /// <param name="scopes">The scopes that separate by coma</param>
+        public string GetAuthorizationUrl(string state, string scopes) {
             return String.Format(
                 "https://api.instagram.com/oauth/authorize?client_id={0}&redirect_uri={1}&response_type=code&state={2}&scope={3}",
                 HttpUtility.UrlEncode(ClientId),
                 HttpUtility.UrlEncode(RedirectUri),
                 HttpUtility.UrlEncode(state),
-                HttpUtility.UrlEncode(string.Join(",", scopes).ToLower())
+                HttpUtility.UrlEncode(scopes.ToLower())
             );
-        }
-
-        /// <summary>
-        /// Gets an authorization URL using the specified <var>state</var> and
-        /// request the specified <var>scope</var>.
-        /// </summary>
-        /// <param name="state">A unique state for the request.</param>
-        /// <param name="scope">The scope of your application.</param>
-        public string GetAuthorizationUrl(string state, InstagramScope scope)            
-        {
-            return GetAuthorizationUrl(state, new List<InstagramScope> { scope });
-        }
+        }        
 
         /// <summary>
         /// Get a Short-Lived Token from AuthCode
@@ -347,6 +337,14 @@ namespace Skybrud.Social.Instagram.OAuth {
                 return SocialHttpResponse.GetFromWebResponse(ex.Response as HttpWebResponse);
             }
 
+        }
+
+        /// <summary>
+        /// / if facebook verion is null or /[version]/
+        /// </summary>
+        /// <returns></returns>
+        public string GetVersionUrl() {
+            return string.IsNullOrEmpty(FacebookApiVersion) ? "/" : $"/{FacebookApiVersion}/";
         }
         
         #endregion

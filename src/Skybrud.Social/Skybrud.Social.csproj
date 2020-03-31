@@ -91,6 +91,7 @@
     <Compile Include="Facebook\Objects\Events\FacebookEventsCollection.cs" />
     <Compile Include="Facebook\Objects\Likes\FacebookLikesCollection.cs" />
     <Compile Include="Facebook\Objects\Comments\FacebookCommentsCollection.cs" />
+    <Compile Include="Facebook\Objects\Pages\FacebookPagesCollection.cs" />
     <Compile Include="Facebook\Objects\Photos\FacebookPhotosCollection.cs" />
     <Compile Include="Facebook\Objects\Posts\FacebookPostsCollection.cs" />
     <Compile Include="Facebook\Endpoints\FacebookDebugEndpoint.cs" />
@@ -190,6 +191,7 @@
     <Compile Include="Facebook\Responses\Links\FacebookLinkResponse.cs" />
     <Compile Include="Facebook\Responses\Links\FacebookLinksResponse.cs" />
     <Compile Include="Facebook\Responses\Links\FacebookPostLinkResponse.cs" />
+    <Compile Include="Facebook\Responses\Pages\FacebookPagesResponse.cs" />
     <Compile Include="Facebook\Responses\Pages\FacebookPageResponse.cs" />
     <Compile Include="Facebook\Responses\Photos\FacebookPhotoResponse.cs" />
     <Compile Include="Facebook\Responses\Photos\FacebookPhotosResponse.cs" />
@@ -449,7 +451,6 @@
     <Compile Include="Instagram\Options\InstagramRecentMediaSearchOptions.cs" />
     <Compile Include="Instagram\Exceptions\InstagramNotFoundException.cs" />
     <Compile Include="Instagram\Exceptions\InstagramOAuthAccessTokenException.cs" />
-    <Compile Include="Instagram\InstagramScope.cs" />
     <Compile Include="Instagram\OAuth\InstagramOAuthClient.cs" />
     <Compile Include="Instagram\Objects\InstagramImageSummary.cs" />
     <Compile Include="Instagram\Objects\InstagramComment.cs" />

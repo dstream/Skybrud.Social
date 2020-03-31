@@ -46,6 +46,16 @@ namespace Skybrud.Social.Facebook.Endpoints.Raw {
             return Client.DoAuthenticatedGetRequest("/" + options.Identifier, options);
         }
 
+        /// <summary>
+        /// Get the User's Pages
+        /// </summary>
+        /// <param name="id">'me' for default</param>
+        /// <returns>name and id</returns>
+        public SocialHttpResponse GetUserPages(string id)
+        {            
+            return Client.DoAuthenticatedGetRequest($"/{id}/accounts?fields=name,id");
+        }
+
         #endregion
 
     }

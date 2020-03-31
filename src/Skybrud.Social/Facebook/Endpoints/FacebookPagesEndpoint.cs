@@ -53,6 +53,16 @@ namespace Skybrud.Social.Facebook.Endpoints {
             return FacebookPageResponse.ParseResponse(Raw.GetPage(options));
         }
 
+        /// <summary>
+        /// Get all user's pages
+        /// </summary>
+        /// <param name="identifier">'me' for default</param>
+        /// <returns></returns>
+        public FacebookPagesResponse GetUserPages(string identifier = "me")
+        {
+            return FacebookPagesResponse.ParseResponse(Raw.GetUserPages(identifier));
+        }      
+
         #endregion
 
     }
