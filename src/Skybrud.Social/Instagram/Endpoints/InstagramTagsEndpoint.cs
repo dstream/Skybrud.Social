@@ -1,6 +1,7 @@
 using Skybrud.Social.Instagram.Endpoints.Raw;
 using Skybrud.Social.Instagram.Responses;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Skybrud.Social.Instagram.Endpoints {
 
@@ -51,7 +52,7 @@ namespace Skybrud.Social.Instagram.Endpoints {
         }
 
         /// <summary>
-        /// Gets the most recent photo and video IG Media objects that have been tagged with this.
+        /// Gets the most recent photo and video IG Media objects (not album) that have been tagged with this.
         /// </summary>
         /// <param name="tagId">The name of the tag.</param>
         /// <param name="count">The maximum amount of media to be returned.</param>
@@ -60,22 +61,22 @@ namespace Skybrud.Social.Instagram.Endpoints {
         {
             var mediaResponse = InstagramMediasResponseBody.Parse(InstagramRecentMediaResponse.ParseResponse(Raw.GetRecentMedia(tagId, userId)));
             var result = new InstagramRecentMediaResponse();
-            result.AppendBody(mediaResponse.Data);
+            result.AppendBody(mediaResponse.Data.Where(e => e.IsMediaType(Objects.InstagramMediaType.IMAGE)));
 
             while (result.CountBody() < count && mediaResponse.Pagination != null && !string.IsNullOrEmpty(mediaResponse.Pagination.NextUrl))
             {
                 mediaResponse = InstagramMediasResponseBody.Parse(InstagramRecentMediaResponse.ParseResponse(Raw.Client.DoAuthenticatedGetRequest(mediaResponse.Pagination.NextUrl)));
-                result.AppendBody(mediaResponse.Data);
+                result.AppendBody(mediaResponse.Data.Where(e => e.IsMediaType(Objects.InstagramMediaType.IMAGE)));
             }
             result.EnsureBodyCount(count);
 
-            EnsureVideoHasThumbnail(result);
+            //EnsureMediaHasThumbnail(result);
 
             return result;
         }
 
         /// <summary>
-        /// Gets the most popular photo and video IG Media objects that have been tagged with this.
+        /// Gets the most popular photo and video IG Media objects (not album) that have been tagged with this.
         /// </summary>
         /// <param name="tagId">The name of the tag.</param>
         /// <param name="count">The maximum amount of media to be returned.</param>
@@ -84,29 +85,40 @@ namespace Skybrud.Social.Instagram.Endpoints {
         {
             var mediaResponse = InstagramMediasResponseBody.Parse(InstagramRecentMediaResponse.ParseResponse(Raw.GetTopMedia(tagId, userId)));
             var result = new InstagramRecentMediaResponse();
-            result.AppendBody(mediaResponse.Data);
+            result.AppendBody(mediaResponse.Data.Where(e => e.IsMediaType(Objects.InstagramMediaType.IMAGE)));
 
             while (result.CountBody() < count && mediaResponse.Pagination != null && !string.IsNullOrEmpty(mediaResponse.Pagination.NextUrl))
             {
                 mediaResponse = InstagramMediasResponseBody.Parse(InstagramRecentMediaResponse.ParseResponse(Raw.Client.DoAuthenticatedGetRequest(mediaResponse.Pagination.NextUrl)));
-                result.AppendBody(mediaResponse.Data);
+                result.AppendBody(mediaResponse.Data.Where(e => e.IsMediaType(Objects.InstagramMediaType.IMAGE)));
             }
             result.EnsureBodyCount(count);
 
-            EnsureVideoHasThumbnail(result);
+            //EnsureMediaHasThumbnail(result);
 
             return result;
         }
 
-        private void EnsureVideoHasThumbnail(InstagramRecentMediaResponse mediaResponse)
-        {
-            //get thumbnail_url of videos
+        /// <summary>
+        /// get thumbnail_url of videos and albums
+        /// This API doesn't work atm, this's a bug maybe
+        /// </summary>
+        /// <param name="mediaResponse"></param>
+        private void EnsureMediaHasThumbnail(InstagramRecentMediaResponse mediaResponse)
+        {            
             foreach (var media in mediaResponse.Body)
             {
-                if (media.Type == "VIDEO")
+                if (!media.IsMediaType(Objects.InstagramMediaType.IMAGE))
                 {
-                    var singleMediaResult = InstagramMediaResponse.ParseResponse(Service.Client.Media.GetMedia(media.Id, InstagramMediaField.thumbnail_url));
-                    media.Thumbnail = singleMediaResult.Body.Data.Thumbnail;
+                    try
+                    {
+                        var singleMediaResult = InstagramMediaResponse.ParseResponse(Service.Client.Media.GetMedia(media.Id, InstagramMediaField.thumbnail_url));
+                        media.Thumbnail = singleMediaResult.Body.Data.Thumbnail;
+                    }
+                    catch 
+                    {
+                        //ignore it
+                    }
                 }
             }
         }

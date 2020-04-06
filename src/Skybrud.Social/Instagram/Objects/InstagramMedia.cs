@@ -77,7 +77,12 @@ namespace Skybrud.Social.Instagram.Objects {
             // Hide default constructor
         }
 
-        #endregion
+        #endregion        
+
+        public bool IsMediaType(InstagramMediaType type)
+        {
+            return Type == type.ToString();
+        }
 
         #region Static methods
 
@@ -162,6 +167,13 @@ namespace Skybrud.Social.Instagram.Objects {
 
         #endregion
 
+    }
+
+    public enum InstagramMediaType
+    {
+        IMAGE,
+        CAROUSEL_ALBUM,
+        VIDEO
     }
 
 }
