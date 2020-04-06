@@ -69,6 +69,11 @@ namespace Skybrud.Social.Http {
             return _nvc.Get(key) != null || _nvc.AllKeys.Contains(key);
         }
 
+        public void Combine(SocialQueryString qs)
+        {
+            _nvc.Add(qs._nvc);
+        }
+
         // TODO: Determine which methods from NameValueCollection that also should be exposed in this class
 
         #endregion

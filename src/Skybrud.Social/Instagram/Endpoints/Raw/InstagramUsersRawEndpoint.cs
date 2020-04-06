@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Skybrud.Social.Http;
 using Skybrud.Social.Instagram.OAuth;
+using Skybrud.Social.Instagram.Objects;
 using Skybrud.Social.Instagram.Options.Users;
 
 namespace Skybrud.Social.Instagram.Endpoints.Raw {
@@ -54,13 +55,11 @@ namespace Skybrud.Social.Instagram.Endpoints.Raw {
         /// <param name="count"></param>
         /// <returns></returns>
         public SocialHttpResponse GetRecentMedia(string identifier)
-        {
-            var fields = string.Join(",", Enum.GetValues(typeof(InstagramMediaField)).Cast<InstagramMediaField>().Select(v => v.ToString()));
-            var url = $"https://graph.instagram.com/{identifier}/media?fields={fields}";
+        {            
+            var url = $"https://graph.instagram.com/{identifier}/media?fields={InstagramMedia.DefaultFields}";
             if (Client.UseInstagramGraphAPI)
-            {
-                var extrafields = string.Join(",", Enum.GetValues(typeof(InstagramMediaExtraField)).Cast<InstagramMediaExtraField>().Select(v => v.ToString())); 
-                url = $"https://graph.facebook.com{Client.GetVersionUrl()}{identifier}/media?fields={fields + "," + extrafields}";
+            {                
+                url = $"https://graph.facebook.com{Client.GetVersionUrl()}{identifier}/media?fields={InstagramMedia.DefaultExtraFields}";
             }
 
             return Client.DoAuthenticatedGetRequest(url);

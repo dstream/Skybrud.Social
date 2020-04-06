@@ -13,9 +13,10 @@ namespace Skybrud.Social.Instagram.Options.Tags {
         /// </summary>
         public int Count { get; set; }
 
-        public string MinTagId { get; set; }
-
-        public string MaxTagId { get; set; }
+        /// <summary>
+        /// Get media that after this tagId
+        /// </summary>
+        public string MinTagId { get; set; }        
 
         #endregion
 
@@ -27,15 +28,13 @@ namespace Skybrud.Social.Instagram.Options.Tags {
             Count = count;
         }
 
-        public InstagramTagRecentMediaOptions(string minTagId, string maxTagId) {
-            MinTagId = minTagId;
-            MaxTagId = maxTagId;
+        public InstagramTagRecentMediaOptions(string minTagId) {
+            MinTagId = minTagId;           
         }
 
-        public InstagramTagRecentMediaOptions(int count, string minTagId, string maxTagId) {
+        public InstagramTagRecentMediaOptions(int count, string minTagId) {
             Count = count;
-            MinTagId = minTagId;
-            MaxTagId = maxTagId;
+            MinTagId = minTagId;            
         }
 
         #endregion
@@ -44,9 +43,8 @@ namespace Skybrud.Social.Instagram.Options.Tags {
 
         public SocialQueryString GetQueryString() {
             SocialQueryString qs = new SocialQueryString();
-            if (Count > 0) qs.Add("count", Count);
-            if (!String.IsNullOrWhiteSpace(MinTagId)) qs.Add("min_tag_id", MinTagId);
-            if (!String.IsNullOrWhiteSpace(MaxTagId)) qs.Add("max_tag_id", MaxTagId);
+            if (Count > 0) qs.Add("limit", Count);
+            if (!String.IsNullOrWhiteSpace(MinTagId)) qs.Add("after", MinTagId);            
             return qs;
         }
 

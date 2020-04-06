@@ -104,24 +104,60 @@ namespace Skybrud.Social.Instagram.Objects {
         public static InstagramMedia Parse(JsonObject obj) {
 
             if (obj == null) return null;
-           
-            string type = obj.GetString("media_type");
-
+                      
             var media = new InstagramMedia(obj)
             {
-                Id = obj.GetString("id"),
-                Type = obj.GetString("media_type"),
-                MediaUrl = obj.GetString("media_url"),
-                Permalink = obj.GetString("permalink"),
-                Thumbnail = obj.GetString("thumbnail_url"),
-                Username = obj.GetString("username"),
-                Timestamp = DateTime.Parse("2010-08-20T15:00:00Z", null, System.Globalization.DateTimeStyles.RoundtripKind),
-                LikesCount = obj.GetInt32("like_count"),
-                CommentsCount = obj.GetInt32("comments_count")
+                Id = obj.GetString(InstagramMediaField.id.ToString()),
+                Type = obj.GetString(InstagramMediaField.media_type.ToString()),
+                MediaUrl = obj.GetString(InstagramMediaField.media_url.ToString()),
+                Permalink = obj.GetString(InstagramMediaField.permalink.ToString()),
+                Thumbnail = obj.GetString(InstagramMediaField.thumbnail_url.ToString()),
+                Username = obj.GetString(InstagramMediaField.username.ToString()),
+                Timestamp = obj.GetDateTime(InstagramMediaField.timestamp.ToString()),
+                LikesCount = obj.GetInt32(InstagramMediaField.like_count.ToString()),
+                CommentsCount = obj.GetInt32(InstagramMediaField.comments_count.ToString())
             };
 
             return media;
 
+        }
+
+        /// <summary>
+        /// id,media_type,media_url,permalink,thumbnail_url,username,timestamp
+        /// </summary>
+        public static string DefaultFields {
+            get
+            {
+                return $"{InstagramMediaField.id},{InstagramMediaField.media_type},{InstagramMediaField.media_url}," +
+                    $"{InstagramMediaField.permalink},{InstagramMediaField.thumbnail_url},{InstagramMediaField.username}," +
+                    $"{InstagramMediaField.timestamp}";
+            }
+        }
+
+        /// <summary>
+        /// id,media_type,media_url,permalink,thumbnail_url,username,timestamp + like_count,comments_count
+        /// </summary>
+        public static string DefaultExtraFields
+        {
+            get
+            {
+                return $"{InstagramMediaField.id},{InstagramMediaField.media_type},{InstagramMediaField.media_url}," +
+                    $"{InstagramMediaField.permalink},{InstagramMediaField.thumbnail_url},{InstagramMediaField.username}," +
+                    $"{InstagramMediaField.timestamp},{InstagramMediaField.like_count},{InstagramMediaField.comments_count}";
+            }
+        }
+
+        /// <summary>
+        /// id,media_type,media_url,permalink,caption,like_count,comments_count
+        /// </summary>
+        public static string HashTagMediaFields
+        {
+            get
+            {
+                return $"{InstagramMediaField.id},{InstagramMediaField.media_type},{InstagramMediaField.media_url}," +
+                    $"{InstagramMediaField.permalink},{InstagramMediaField.caption},{InstagramMediaField.like_count}," +
+                    $"{InstagramMediaField.comments_count}";
+            }
         }
 
         #endregion

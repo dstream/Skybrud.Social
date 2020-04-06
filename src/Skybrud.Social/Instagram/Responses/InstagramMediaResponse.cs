@@ -50,7 +50,7 @@ namespace Skybrud.Social.Instagram.Responses {
 
         public static InstagramMediaResponseBody Parse(JsonObject obj) {
             return new InstagramMediaResponseBody(obj) {
-                Data = obj.GetObject("data", InstagramMedia.Parse)
+                Data = InstagramMedia.Parse(obj)// because single media API didn't store result in data attribute like others, that's suck!
             };
         }
 
