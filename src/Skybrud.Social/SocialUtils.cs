@@ -68,7 +68,7 @@ namespace Skybrud.Social {
 
         #region HTTP helpers
 
-        private static HttpWebResponse DoHttpRequest(string url, string method, NameValueCollection queryString, NameValueCollection postData) {
+        private static HttpWebResponse DoHttpRequest(string url, string method, NameValueCollection queryString, NameValueCollection postData, string authorizationHeader = null) {
 
             // TODO: Decide better naming of method
 
@@ -81,10 +81,15 @@ namespace Skybrud.Social {
             // Set the method
             request.Method = method;
 
+            if (!string.IsNullOrEmpty(authorizationHeader))
+            {
+                request.Headers.Add(HttpRequestHeader.Authorization, authorizationHeader);
+            }
+
             // Add the request body (if a POST request)
             if (method == "POST" && postData != null && postData.Count > 0) {
                 string dataString = NameValueCollectionToQueryString(postData);
-                request.ContentType = "application/x-www-form-urlencoded";
+                request.ContentType = "application/x-www-form-urlencoded";                
                 request.ContentLength = dataString.Length;
                 using (Stream stream = request.GetRequestStream()) {
                     stream.Write(Encoding.UTF8.GetBytes(dataString), 0, dataString.Length);
@@ -102,28 +107,28 @@ namespace Skybrud.Social {
 
         #region GET
 
-        public static HttpWebResponse DoHttpGetRequest(string baseUrl, NameValueCollection queryString = null) {
-            return DoHttpRequest(baseUrl, "GET", queryString, null);
+        public static HttpWebResponse DoHttpGetRequest(string baseUrl, NameValueCollection queryString = null, string authorizationHeader = null) {
+            return DoHttpRequest(baseUrl, "GET", queryString, null, authorizationHeader);
         }
 
-        public static string DoHttpGetRequestAndGetBodyAsString(string url, NameValueCollection queryString = null) {
-            return DoHttpGetRequest(url, queryString).GetAsString();
+        public static string DoHttpGetRequestAndGetBodyAsString(string url, NameValueCollection queryString = null, string authorizationHeader = null) {
+            return DoHttpGetRequest(url, queryString, authorizationHeader).GetAsString();
         }
 
-        public static IJsonObject DoHttpGetRequestAndGetBodyAsJson(string url, NameValueCollection queryString = null) {
-            return DoHttpGetRequest(url, queryString).GetAsJson();
+        public static IJsonObject DoHttpGetRequestAndGetBodyAsJson(string url, NameValueCollection queryString = null, string authorizationHeader = null) {
+            return DoHttpGetRequest(url, queryString, authorizationHeader).GetAsJson();
         }
 
-        public static JsonObject DoHttpGetRequestAndGetBodyAsJsonObject(string url, NameValueCollection queryString = null) {
-            return DoHttpGetRequest(url, queryString).GetAsJsonObject();
+        public static JsonObject DoHttpGetRequestAndGetBodyAsJsonObject(string url, NameValueCollection queryString = null, string authorizationHeader = null) {
+            return DoHttpGetRequest(url, queryString, authorizationHeader).GetAsJsonObject();
         }
 
-        public static JsonArray DoHttpGetRequestAndGetBodyAsJsonArray(string url, NameValueCollection queryString = null) {
-            return DoHttpGetRequest(url, queryString).GetAsJsonArray();
+        public static JsonArray DoHttpGetRequestAndGetBodyAsJsonArray(string url, NameValueCollection queryString = null, string authorizationHeader = null) {
+            return DoHttpGetRequest(url, queryString, authorizationHeader).GetAsJsonArray();
         }
 
-        public static XElement DoHttpGetRequestAndGetBodyAsXml(string url, NameValueCollection queryString = null) {
-            HttpWebResponse response = DoHttpGetRequest(url, queryString);
+        public static XElement DoHttpGetRequestAndGetBodyAsXml(string url, NameValueCollection queryString = null, string authorizationHeader = null) {
+            HttpWebResponse response = DoHttpGetRequest(url, queryString, authorizationHeader);
             Stream stream = response.GetResponseStream();
             return stream == null ? null : XElement.Parse(new StreamReader(stream).ReadToEnd());
         }
@@ -132,28 +137,28 @@ namespace Skybrud.Social {
 
         #region POST
 
-        public static HttpWebResponse DoHttpPostRequest(string baseUrl, NameValueCollection queryString, NameValueCollection postData) {
+        public static HttpWebResponse DoHttpPostRequest(string baseUrl, NameValueCollection queryString, NameValueCollection postData, string authorizationHeader = null) {
             return DoHttpRequest(baseUrl, "POST", queryString, postData);
         }
 
-        public static string DoHttpPostRequestAndGetBodyAsString(string url, NameValueCollection queryString = null, NameValueCollection postData = null) {
-            return DoHttpPostRequest(url, queryString, postData).GetAsString();
+        public static string DoHttpPostRequestAndGetBodyAsString(string url, NameValueCollection queryString = null, NameValueCollection postData = null, string authorizationHeader = null) {
+            return DoHttpPostRequest(url, queryString, postData, authorizationHeader).GetAsString();
         }
 
-        public static IJsonObject DoHttpPostRequestAndGetBodyAsJson(string url, NameValueCollection queryString = null, NameValueCollection postData = null) {
-            return DoHttpPostRequest(url, queryString, postData).GetAsJson();
+        public static IJsonObject DoHttpPostRequestAndGetBodyAsJson(string url, NameValueCollection queryString = null, NameValueCollection postData = null, string authorizationHeader = null) {
+            return DoHttpPostRequest(url, queryString, postData, authorizationHeader).GetAsJson();
         }
 
-        public static JsonObject DoHttpPostRequestAndGetBodyAsJsonObject(string url, NameValueCollection queryString = null, NameValueCollection postData = null) {
-            return DoHttpPostRequest(url, queryString, postData).GetAsJsonObject();
+        public static JsonObject DoHttpPostRequestAndGetBodyAsJsonObject(string url, NameValueCollection queryString = null, NameValueCollection postData = null, string authorizationHeader = null) {
+            return DoHttpPostRequest(url, queryString, postData, authorizationHeader).GetAsJsonObject();
         }
 
-        public static JsonArray DoHttpPostRequestAndGetBodyAsJsonArray(string url, NameValueCollection queryString = null, NameValueCollection postData = null) {
-            return DoHttpPostRequest(url, queryString, postData).GetAsJsonArray();
+        public static JsonArray DoHttpPostRequestAndGetBodyAsJsonArray(string url, NameValueCollection queryString = null, NameValueCollection postData = null, string authorizationHeader = null) {
+            return DoHttpPostRequest(url, queryString, postData, authorizationHeader).GetAsJsonArray();
         }
 
-        public static XElement DoHttpPostRequestAndGetBodyAsXml(string url, NameValueCollection queryString = null, NameValueCollection postData = null) {
-            HttpWebResponse response = DoHttpPostRequest(url, queryString, postData);
+        public static XElement DoHttpPostRequestAndGetBodyAsXml(string url, NameValueCollection queryString = null, NameValueCollection postData = null, string authorizationHeader = null) {
+            HttpWebResponse response = DoHttpPostRequest(url, queryString, postData, authorizationHeader);
             Stream stream = response.GetResponseStream();
             return stream == null ? null : XElement.Parse(new StreamReader(stream).ReadToEnd());
         }
@@ -294,6 +299,11 @@ namespace Skybrud.Social {
 
             // Check whether the type of T is an enum
             if (!typeof(T).IsEnum) throw new ArgumentException("Generic type T must be an enum");
+
+            if (string.IsNullOrEmpty(str))
+            {
+                return default(T);
+            }
 
             // Parse the enum
             foreach (string name in Enum.GetNames(typeof(T))) {
