@@ -105,7 +105,7 @@ namespace Skybrud.Social.Google.Analytics {
             );
 
             // Make the call to the API
-            return Client.DoAuthenticatedGetRequest(url);
+            return Client.DoAuthenticatedGetRequest(url).GetBodyAsString();
 
         }
 
@@ -171,7 +171,7 @@ namespace Skybrud.Social.Google.Analytics {
             );
 
             // Make the call to the API
-            return Client.DoAuthenticatedGetRequest(url, query);
+            return Client.DoAuthenticatedGetRequest(url, query).GetBodyAsString();
 
         }
 

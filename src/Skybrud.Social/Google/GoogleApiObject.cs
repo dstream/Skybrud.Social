@@ -13,6 +13,25 @@ namespace Skybrud.Social.Google {
 
         #endregion
 
+        #region public methods
+
+        /// <summary>
+        /// Parse ID from name, ie: accounts/{accountId}
+        /// </summary>
+        /// <returns></returns>
+        public string ParseId()
+        {
+            var name = JsonObject.GetString("name");
+            var slashIndex = name.LastIndexOf('/');
+            if (!string.IsNullOrEmpty(name) && slashIndex > 0)
+            {
+                return name.Substring(slashIndex + 1);
+            }
+            return string.Empty;
+        }
+
+        #endregion
+
     }
 
 }

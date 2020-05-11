@@ -2,6 +2,7 @@ using System;
 using System.Collections.Specialized;
 using Skybrud.Social.Google.Analytics;
 using Skybrud.Social.Google.Exceptions;
+using Skybrud.Social.Google.MyBusiness.Endpoints.Raw;
 using Skybrud.Social.Google.YouTube;
 using Skybrud.Social.Google.YouTube.Endpoints.Raw;
 using Skybrud.Social.Http;
@@ -9,11 +10,11 @@ using Skybrud.Social.Interfaces;
 using Skybrud.Social.Json;
 
 namespace Skybrud.Social.Google.OAuth {
-    
+
     /// <summary>
     /// A client for handling the communication with the Google APIs using
     /// OAuth 2.0. The client is also responsible for the raw communication
-    /// with the various Google APIs.
+    /// with the various Google APIs. https://developers.google.com/identity/protocols/oauth2/web-server?authuser=1
     /// </summary>
     public class GoogleOAuthClient {
 
@@ -21,6 +22,7 @@ namespace Skybrud.Social.Google.OAuth {
 
         private AnalyticsRawEndpoint _analytics;
         private YouTubeRawEndpoint _youtube;
+        private MyBusinessRawEndpoint _myBusiness;
 
         #endregion
 
@@ -77,9 +79,18 @@ namespace Skybrud.Social.Google.OAuth {
             get { return _youtube ?? (_youtube = new YouTubeRawEndpoint(this)); }
         }
 
+        public MyBusinessRawEndpoint MyBusiness
+        {
+            get { return _myBusiness ?? (_myBusiness = new MyBusinessRawEndpoint(this)); }
+        }
+
         #endregion
 
         #region Methods
+
+        private string GetAuthorizationHeader() {
+            return "Bearer " + AccessToken;
+        }
 
         /// <summary>
         /// Gets the authorization URL at accounts.google.com for your application.
@@ -88,7 +99,7 @@ namespace Skybrud.Social.Google.OAuth {
         /// <param name="scope">The scope of the application.</param>
         /// <param name="offline">Whether the application should be enabled for offline access. Default is false.</param>
         public string GetAuthorizationUrl(string state, string scope, bool offline = false) {
-            return GenerateUrl("https://accounts.google.com/o/oauth2/auth", new NameValueCollection {
+            return GenerateUrl("https://accounts.google.com/o/oauth2/v2/auth", new NameValueCollection {
                 {"response_type", "code"},
                 {"client_id", ClientIdFull},
                 {"access_type", offline ? "offline" : "online"},
@@ -105,7 +116,7 @@ namespace Skybrud.Social.Google.OAuth {
         /// <param name="scope">The scope of the application.</param>
         /// <param name="offline">Whether the application should be enabled for offline access. Default is false.</param>
         public string GetAuthorizationUrl(string state, GoogleScopeCollection scope, bool offline = false) {
-            return GenerateUrl("https://accounts.google.com/o/oauth2/auth", new NameValueCollection {
+            return GenerateUrl("https://accounts.google.com/o/oauth2/v2/auth", new NameValueCollection {
                 {"response_type", "code"},
                 {"client_id", ClientIdFull},
                 {"access_type", offline ? "offline" : "online"},
@@ -122,12 +133,12 @@ namespace Skybrud.Social.Google.OAuth {
         /// <param name="scope">The scope of the application.</param>
         /// <param name="accessType">Whether the application should be enabled for offline access. Default is online.</param>
         /// <param name="approvalPrompt">Whether the user should be re-prompted for scopes that he/she already has approved.</param>
-        public string GetAuthorizationUrl(string state, string scope, GoogleAccessType accessType = GoogleAccessType.Online, GoogleApprovalPrompt approvalPrompt = GoogleApprovalPrompt.Auto) {
-            return GenerateUrl("https://accounts.google.com/o/oauth2/auth", new NameValueCollection {
+        public string GetAuthorizationUrl(string state, string scope, GoogleAccessType accessType = GoogleAccessType.Online, GoogleApprovalPrompt approvalPrompt = GoogleApprovalPrompt.none) {
+            return GenerateUrl("https://accounts.google.com/o/oauth2/v2/auth", new NameValueCollection {
                 {"response_type", "code"},
                 {"client_id", ClientIdFull},
                 {"access_type", accessType.ToString().ToLower()},
-                {"approval_prompt", approvalPrompt.ToString().ToLower()},
+                {"prompt", approvalPrompt.ToString().ToLower()},
                 {"scope", scope},
                 {"redirect_uri", RedirectUri},
                 {"state", state}
@@ -141,12 +152,12 @@ namespace Skybrud.Social.Google.OAuth {
         /// <param name="scope">The scope of the application.</param>
         /// <param name="accessType">Whether the application should be enabled for offline access. Default is online.</param>
         /// <param name="approvalPrompt">Whether the user should be re-prompted for scopes that he/she already has approved.</param>
-        public string GetAuthorizationUrl(string state, GoogleScopeCollection scope, GoogleAccessType accessType = GoogleAccessType.Online, GoogleApprovalPrompt approvalPrompt = GoogleApprovalPrompt.Auto) {
-            return GenerateUrl("https://accounts.google.com/o/oauth2/auth", new NameValueCollection {
+        public string GetAuthorizationUrl(string state, GoogleScopeCollection scope, GoogleAccessType accessType = GoogleAccessType.Online, GoogleApprovalPrompt approvalPrompt = GoogleApprovalPrompt.none) {
+            return GenerateUrl("https://accounts.google.com/o/oauth2/v2/auth", new NameValueCollection {
                 {"response_type", "code"},
                 {"client_id", ClientIdFull},
                 {"access_type", accessType.ToString().ToLower()},
-                {"approval_prompt", approvalPrompt.ToString().ToLower()},
+                {"prompt", approvalPrompt.ToString().ToLower()},
                 {"scope", scope + ""},
                 {"redirect_uri", RedirectUri},
                 {"state", state}
@@ -169,7 +180,7 @@ namespace Skybrud.Social.Google.OAuth {
             };
 
             // Make a call to the server
-            JsonObject json = SocialUtils.DoHttpPostRequestAndGetBodyAsJsonObject("https://accounts.google.com/o/oauth2/token", null, postData);
+            JsonObject json = SocialUtils.DoHttpPostRequestAndGetBodyAsJsonObject("https://oauth2.googleapis.com/token", null, postData);
 
             // Check for an error message
             if (json.HasValue("error")) throw new Exception(json.GetString("error"));
@@ -190,7 +201,7 @@ namespace Skybrud.Social.Google.OAuth {
             };
 
             // Make a call to the server
-            JsonObject json = SocialUtils.DoHttpPostRequestAndGetBodyAsJsonObject("https://accounts.google.com/o/oauth2/token", null, postData);
+            JsonObject json = SocialUtils.DoHttpPostRequestAndGetBodyAsJsonObject("https://oauth2.googleapis.com/token", null, postData);
 
             // Check for an error message
             if (json.HasValue("error")) {
@@ -203,20 +214,26 @@ namespace Skybrud.Social.Google.OAuth {
         }
 
         /// <summary>
-        /// Gets information about the authenticated user.
+        /// Revoking a token
         /// </summary>
-        public string GetUserInfo() {
-            return DoAuthenticatedGetRequest("https://www.googleapis.com/oauth2/v3/userinfo");
+        /// <param name="token">AccessToken or Refresh-Token</param>
+        public void RevokeAccessToken(string token)
+        {            
+            NameValueCollection qs = new NameValueCollection {
+                {"token", token},                
+            };
+
+            // Make a call to the server
+            var response = SocialUtils.DoHttpGetRequest("https://oauth2.googleapis.com/revoke", qs);                        
+
         }
 
         /// <summary>
-        /// Makes an authenticated GET request to the specified URL. The access token is
-        /// automatically appended to the query string.
+        /// Gets information about the authenticated user.
         /// </summary>
-        /// <param name="url">The URL to call.</param>
-        public string DoAuthenticatedGetRequest(string url) {
-            return DoAuthenticatedGetRequest(url, default(NameValueCollection));
-        }
+        public SocialHttpResponse GetUserInfo() {
+            return DoAuthenticatedGetRequest("https://www.googleapis.com/oauth2/v3/userinfo");
+        }          
 
         /// <summary>
         /// Makes an authenticated GET request to the specified URL. The access token is
@@ -224,22 +241,35 @@ namespace Skybrud.Social.Google.OAuth {
         /// </summary>
         /// <param name="url">The URL to call.</param>
         /// <param name="query">The query string for the call.</param>
-        public string DoAuthenticatedGetRequest(string url, NameValueCollection query) {
+        public SocialHttpResponse DoAuthenticatedGetRequest(string url, NameValueCollection query) {
 
             // Initialize a new NameValueCollection if NULL
             if (query == null) query = new NameValueCollection();
 
-            // Append the access token or server if specified
+            // Append the access token or server if specified            
             if (!String.IsNullOrWhiteSpace(AccessToken)) {
-                // TODO: Specify access token in HTTP header instead
-                query.Set("access_token", AccessToken);
+                //Specify access token in HTTP header
+                return SocialHttpResponse.GetFromWebResponse(SocialUtils.DoHttpGetRequest(url, query, GetAuthorizationHeader()));                
             } else if (!String.IsNullOrWhiteSpace(ServerKey)) {
                 query.Set("key", ServerKey);
             }
 
             // Make a call to the API
-            return SocialUtils.DoHttpGetRequestAndGetBodyAsString(url, query);
+            return SocialHttpResponse.GetFromWebResponse(SocialUtils.DoHttpGetRequest(url, query));
 
+        }
+
+        /// <summary>
+        /// Makes an authenticated GET request to the specified URL. If an access token has been
+        /// specified for this client, that access token will be added to the query string.
+        /// Similar if a client ID has been specified instead of an access token, that client ID
+        /// will be added to the query string. However some endpoint methods may require an access
+        /// token, and a client ID will therefore not be sufficient for such methods.
+        /// </summary>
+        /// <param name="url">The URL to call.</param>
+        public SocialHttpResponse DoAuthenticatedGetRequest(string url)
+        {
+            return DoAuthenticatedGetRequest(url, new NameValueCollection());
         }
 
         /// <summary>
@@ -255,8 +285,8 @@ namespace Skybrud.Social.Google.OAuth {
 
             // Append the access token or server if specified
             if (!String.IsNullOrWhiteSpace(AccessToken)) {
-                // TODO: Specify access token in HTTP header instead
-                query.Set("access_token", AccessToken);
+                // Specify access token in HTTP header
+                return SocialHttpResponse.GetFromWebResponse(SocialUtils.DoHttpGetRequest(url, query, GetAuthorizationHeader()));
             } else if (!String.IsNullOrWhiteSpace(ServerKey)) {
                 query.Set("key", ServerKey);
             }
@@ -264,7 +294,7 @@ namespace Skybrud.Social.Google.OAuth {
             // Make a call to the API
             return SocialHttpResponse.GetFromWebResponse(SocialUtils.DoHttpGetRequest(url, query));
 
-        }
+        }        
 
         #endregion
 

@@ -1,5 +1,6 @@
 using System;
 using Skybrud.Social.Google.Analytics;
+using Skybrud.Social.Google.MyBusiness.Endpoints;
 using Skybrud.Social.Google.OAuth;
 using Skybrud.Social.Google.YouTube.Endpoints;
 
@@ -14,6 +15,7 @@ namespace Skybrud.Social.Google {
 
         private AnalyticsEndpoint _analytics;
         private YouTubeEndpoint _youtube;
+        private MyBusinessEndpoint _myBusiness;
 
         #endregion
 
@@ -38,6 +40,11 @@ namespace Skybrud.Social.Google {
             get { return _youtube ?? (_youtube = new YouTubeEndpoint(this)); }
         }
 
+        public MyBusinessEndpoint MyBusiness
+        {
+            get { return _myBusiness ?? (_myBusiness = new MyBusinessEndpoint(this)); }
+        }
+
         #endregion
 
         #region Constructors
@@ -53,7 +60,7 @@ namespace Skybrud.Social.Google {
         /// </summary>
         /// <returns></returns>
         public GoogleUserInfo GetUserInfo() {
-            return GoogleUserInfo.ParseJson(Client.GetUserInfo());
+            return GoogleUserInfo.ParseJson(Client.GetUserInfo().GetBodyAsString());
         }
 
         #endregion

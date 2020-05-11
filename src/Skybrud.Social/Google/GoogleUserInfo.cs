@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using Skybrud.Social.Google.Exceptions;
 using Skybrud.Social.Json;
 
 namespace Skybrud.Social.Google {
@@ -110,6 +111,13 @@ namespace Skybrud.Social.Google {
         /// <param name="obj">The instance of <var>JsonObject</var> to parse.</param>
         public static GoogleUserInfo Parse(JsonObject obj) {
             if (obj == null) return null;
+
+            // Check for an error message
+            if (obj.HasValue("error"))
+            {
+                throw new GoogleOAuthException(obj.GetString("error"), obj.GetString("error_description"));
+            }
+
             return new GoogleUserInfo(obj) {
                 Id = obj.GetString("sub"),
                 Name = obj.GetString("name"),
