@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Skybrud.Social.Interfaces;
 using Skybrud.Social.Json;
 
@@ -174,6 +175,19 @@ namespace Skybrud.Social.Instagram.Objects {
         IMAGE,
         CAROUSEL_ALBUM,
         VIDEO
+    }
+
+    public class InstagramMediaComparer : IEqualityComparer<InstagramMedia>
+    {
+        public bool Equals(InstagramMedia x, InstagramMedia y)
+        {
+            return x.Id.Equals(y.Id, StringComparison.InvariantCultureIgnoreCase) || x.MediaUrl.Equals(y.MediaUrl, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        public int GetHashCode(InstagramMedia obj)
+        {
+            return obj.Id.GetHashCode();
+        }
     }
 
 }

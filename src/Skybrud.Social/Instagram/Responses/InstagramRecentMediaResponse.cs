@@ -16,6 +16,11 @@ namespace Skybrud.Social.Instagram.Responses {
             Body = new List<InstagramMedia>();
         }
 
+        public void SetBody(List<InstagramMedia> body)
+        {
+            Body = body;
+        }
+
         private InstagramRecentMediaResponse(SocialHttpResponse response) : base(response) { }
 
         #endregion
@@ -36,36 +41,8 @@ namespace Skybrud.Social.Instagram.Responses {
 
             return obj;
 
-        }
-
-        public void AppendBody(IEnumerable<InstagramMedia> body)
-        {
-            if (body == null) return;
-            EnsureBodyNotNull();            
-            Body.AddRange(body);
-        }
-
-        public int CountBody()
-        {
-            EnsureBodyNotNull();
-            return Body.Count;
-        }
-
-        /// <summary>
-        /// Ensure only get [count] of data
-        /// </summary>
-        /// <param name="count"></param>
-        public void EnsureBodyCount(int count) {
-            Body = Body.Take(count).ToList();
-        }
-
-        private void EnsureBodyNotNull()
-        {
-            if (Body == null)
-            {
-                Body = new List<InstagramMedia>();
-            }
-        }
+        }                
+        
 
         #endregion
 

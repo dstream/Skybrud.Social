@@ -1,4 +1,5 @@
 using Skybrud.Social.Instagram.Endpoints.Raw;
+using Skybrud.Social.Instagram.Objects;
 using Skybrud.Social.Instagram.Responses;
 using System.Collections.Generic;
 using System.Linq;
@@ -61,16 +62,15 @@ namespace Skybrud.Social.Instagram.Endpoints {
         {
             var mediaResponse = InstagramMediasResponseBody.Parse(InstagramRecentMediaResponse.ParseResponse(Raw.GetRecentMedia(tagId, userId)));
             var result = new InstagramRecentMediaResponse();
-            result.AppendBody(mediaResponse.Data.Where(e => e.IsMediaType(Objects.InstagramMediaType.IMAGE)));
+            //have to use hashset here because the tag API returns duplicated images
+            var hashset = new HashSet<InstagramMedia>(mediaResponse.Data.Where(e => e.IsMediaType(InstagramMediaType.IMAGE)), new InstagramMediaComparer());
 
-            while (result.CountBody() < count && mediaResponse.Pagination != null && !string.IsNullOrEmpty(mediaResponse.Pagination.NextUrl))
+            while (hashset.Count < count && mediaResponse.Pagination != null && !string.IsNullOrEmpty(mediaResponse.Pagination.NextUrl))
             {
                 mediaResponse = InstagramMediasResponseBody.Parse(InstagramRecentMediaResponse.ParseResponse(Raw.Client.DoAuthenticatedGetRequest(mediaResponse.Pagination.NextUrl)));
-                result.AppendBody(mediaResponse.Data.Where(e => e.IsMediaType(Objects.InstagramMediaType.IMAGE)));
+                hashset.UnionWith(mediaResponse.Data.Where(e => e.IsMediaType(InstagramMediaType.IMAGE)));
             }
-            result.EnsureBodyCount(count);
-
-            //EnsureMediaHasThumbnail(result);
+            result.SetBody(hashset.Take(count).ToList());
 
             return result;
         }
@@ -85,16 +85,14 @@ namespace Skybrud.Social.Instagram.Endpoints {
         {
             var mediaResponse = InstagramMediasResponseBody.Parse(InstagramRecentMediaResponse.ParseResponse(Raw.GetTopMedia(tagId, userId)));
             var result = new InstagramRecentMediaResponse();
-            result.AppendBody(mediaResponse.Data.Where(e => e.IsMediaType(Objects.InstagramMediaType.IMAGE)));
+            var hashset = new HashSet<InstagramMedia>(mediaResponse.Data.Where(e => e.IsMediaType(InstagramMediaType.IMAGE)), new InstagramMediaComparer());                        
 
-            while (result.CountBody() < count && mediaResponse.Pagination != null && !string.IsNullOrEmpty(mediaResponse.Pagination.NextUrl))
+            while (hashset.Count < count && mediaResponse.Pagination != null && !string.IsNullOrEmpty(mediaResponse.Pagination.NextUrl))
             {
                 mediaResponse = InstagramMediasResponseBody.Parse(InstagramRecentMediaResponse.ParseResponse(Raw.Client.DoAuthenticatedGetRequest(mediaResponse.Pagination.NextUrl)));
-                result.AppendBody(mediaResponse.Data.Where(e => e.IsMediaType(Objects.InstagramMediaType.IMAGE)));
+                hashset.UnionWith(mediaResponse.Data.Where(e => e.IsMediaType(InstagramMediaType.IMAGE)));                
             }
-            result.EnsureBodyCount(count);
-
-            //EnsureMediaHasThumbnail(result);
+            result.SetBody(hashset.Take(count).ToList());
 
             return result;
         }

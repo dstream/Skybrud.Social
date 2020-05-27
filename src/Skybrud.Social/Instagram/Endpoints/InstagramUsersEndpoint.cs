@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Skybrud.Social.Instagram.Endpoints.Raw;
+using Skybrud.Social.Instagram.Objects;
 using Skybrud.Social.Instagram.Options.Users;
 using Skybrud.Social.Instagram.Responses;
 
@@ -69,14 +72,14 @@ namespace Skybrud.Social.Instagram.Endpoints {
         public InstagramRecentMediaResponse GetRecentMedia(string userId, int count) {
             var mediaResponse = InstagramMediasResponseBody.Parse(InstagramRecentMediaResponse.ParseResponse(Raw.GetRecentMedia(userId)));
             var result = new InstagramRecentMediaResponse();
-            result.AppendBody(mediaResponse.Data);
+            var hashset = new List<InstagramMedia>(mediaResponse.Data);
 
-            while (result.CountBody() < count && mediaResponse.Pagination != null && !string.IsNullOrEmpty(mediaResponse.Pagination.NextUrl))
+            while (hashset.Count < count && mediaResponse.Pagination != null && !string.IsNullOrEmpty(mediaResponse.Pagination.NextUrl))
             {                 
                 mediaResponse = InstagramMediasResponseBody.Parse(InstagramRecentMediaResponse.ParseResponse(Raw.Client.DoAuthenticatedGetRequest(mediaResponse.Pagination.NextUrl)));
-                result.AppendBody(mediaResponse.Data);
-            }
-            result.EnsureBodyCount(count);
+                hashset.AddRange(mediaResponse.Data);
+            }            
+            result.SetBody(hashset.Take(count).ToList());
             return result;
         }
        
